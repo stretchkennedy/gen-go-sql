@@ -5,15 +5,18 @@ import (
 	"fmt"
 	"os"
 	"strings"
+
+	"golang.org/x/sync/errgroup"
 )
 
 func main() {
+	// TODO: better argument parsing
 	flag.Parse()
 	models := flag.Args()
 
 	// TOOD: better validation of model names
 	if len(models) == 0 {
-		flag.PrintDefaults()
+		fmt.Println("Argukment names must be passed")
 		os.Exit(1)
 	}
 	pkg := os.Getenv("GOPACKAGE")
@@ -22,24 +25,16 @@ func main() {
 		os.Exit(1)
 	}
 
-	results := make(chan error)
+	var g errgroup.Group
 	for i := range models {
 		model := models[i]
-		go func() {
+		g.Go(func() error {
 			filename := strings.ToLower(model) + ".gen.go"
-			results <- writeRepoToFile(filename, model, pkg)
-		}()
+			return writeRepoToFile(filename, model, pkg)
+		})
 	}
-	errCount := 0
-	for i := 0; i < len(models); i++ {
-		if err := <-results; err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			errCount += 1
-		}
-	}
-	if errCount > 0 {
+	if err := g.Wait(); err != nil {
+		fmt.Fprintf(os.Stderr, "go-gen-sql: %v", err)
 		os.Exit(1)
-	} else {
-		os.Exit(0)
 	}
 }
