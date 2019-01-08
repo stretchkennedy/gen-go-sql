@@ -44,7 +44,7 @@ Running the example
 -------------------
 
 ```bash
-git clone https://github.com/stretchkennedy/gen-go-sql.git
+git clone https://github.com/stretchkennedy/go-gen-sql.git
 cd go-gen-sql
 go build -i
 cd example
