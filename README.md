@@ -44,9 +44,10 @@ Running the example
 -------------------
 
 ```bash
+git clone https://github.com/stretchkennedy/gen-go-sql.git
 cd go-gen-sql
 go build
 cd example
-go generate
+go generate ./...
 go run main.go
 ```
